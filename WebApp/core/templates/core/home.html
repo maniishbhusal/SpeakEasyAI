@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SpeechEasyAI{% endblock title %}
+
+{% block content %}
+<!-- Extension Popup -->
+<div class="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 transform transition duration-300 hover:shadow-2xl">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-5 text-white">
+        <div class="flex items-center space-x-2">
+            <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">SpeechEasyAI</h1>
+        </div>
+        <p class="text-primary-100 text-sm mt-1">Convert your speech to text with AI</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="p-5">
+        <!-- Transcription Box -->
+        <div id="transcription" class="h-48 mb-5 p-4 bg-gray-50 rounded-lg overflow-y-auto hidden border border-gray-200 shadow-inner-lg transition-all duration-300">
+            <p class="text-gray-500 italic">Your transcription will appear here...</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex gap-3">
+            <button id="startBtn" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+                <span>Start Recording</span>
+            </button>
+            <button id="stopBtn" disabled class="flex-1 bg-gray-200 text-gray-400 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 cursor-not-allowed focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                </svg>
+                <span>Stop Recording</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div id="status" class="px-5 py-3 bg-gray-50 text-sm text-gray-500 border-t border-gray-200 flex items-center justify-center">
+        <div class="flex items-center">
+            <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+            Ready to record
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'core/script.js' %}"></script>
+{% endblock scripts %}

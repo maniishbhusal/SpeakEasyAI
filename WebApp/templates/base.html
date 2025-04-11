@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SpeechEasyAI{% endblock title %}</title>
+    <!-- Tailwind via CDN (or use django-tailwind) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            300: '#7cc5fb',
+                            400: '#36a4f7',
+                            500: '#0e88eb',
+                            600: '#0072d6',
+                            700: '#0257ad',
+                            800: '#064a8d',
+                            900: '#0c3f74',
+                        }
+                    },
+                    boxShadow: {
+                        'inner-lg': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_head %}{% endblock extra_head %}
+</head>
+<body class="h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    {% block content %}{% endblock content %}
+    {% block scripts %}{% endblock scripts %}
+</body>
+</html>
