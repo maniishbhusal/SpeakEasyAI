@@ -2,91 +2,217 @@ const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const transcriptionBox = document.getElementById('transcription');
 const statusEl = document.getElementById('status');
-const statusIndicator = statusEl.querySelector('span');
+
+let recognition;
+let isRecording = false;
+let finalTranscript = '';
 
 startBtn.addEventListener('click', async () => {
     try {
-        // Request microphone permission
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        // UI Updates
-        startBtn.disabled = true;
-        startBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        stopBtn.disabled = false;
-        
-        // Update the stop button style
-        stopBtn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
-        stopBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'shadow-md', 'hover:shadow-lg');
-        
-        // Update the transcription box
-        transcriptionBox.classList.remove('hidden');
-        transcriptionBox.innerHTML = '<p class="text-gray-700">Listening...</p>';
-        
-        // Update status
-        statusEl.innerHTML = `
-            <div class="flex items-center">
-                <span class="w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>
-                Recording...
-            </div>
-        `;
-        
-        // Mock transcription (every 2 seconds)
-        const mockTranscript = [
-            "Hello there!",
-            "This is a simulated transcription.",
-            "In a real app, this would be from the Whisper API.",
-            "But for now, enjoy these placeholder messages!"
-        ];
-        
-        let i = 0;
-        const interval = setInterval(() => {
-            transcriptionBox.innerHTML += `<p class="mt-2 py-1 px-3 bg-primary-50 rounded-lg border-l-2 border-primary-300">${mockTranscript[i]}</p>`;
-            transcriptionBox.scrollTop = transcriptionBox.scrollHeight;
-            i = (i + 1) % mockTranscript.length;
-        }, 2000);
+        // Check for browser support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            showError("Speech Recognition not supported in this browser. Please try Chrome, Edge, or Safari.");
+            return;
+        }
 
-        // Cleanup on stop
-        stopBtn.addEventListener('click', () => {
-            clearInterval(interval);
-            stream.getTracks().forEach(track => track.stop());
+        // Setup recognition
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        // Update UI for recording state
+        setRecordingState(true);
+
+        recognition.onstart = () => {
+            console.log("Speech recognition started");
+            isRecording = true;
+        };
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
             
-            // Reset UI
-            stopBtn.disabled = true;
-            stopBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'shadow-md', 'hover:shadow-lg');
-            stopBtn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                const confidence = event.results[i][0].confidence;
+                
+                if (event.results[i].isFinal) {
+                    // Add confidence indicator for final results
+                    const confidenceLevel = getConfidenceLevel(confidence);
+                    const confidenceIndicator = `<span class="confidence-${confidenceLevel}"></span>`;
+                    
+                    finalTranscript += `<div class="transcription-entry">
+                        ${confidenceIndicator}
+                        <span class="transcript-text">${transcript}</span>
+                    </div>`;
+                    
+                    console.log(`✅ Final (${Math.round(confidence * 100)}%):`, transcript);
+                } else {
+                    interimTranscript = transcript;
+                }
+            }
             
-            startBtn.disabled = false;
-            startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            updateTranscriptionDisplay(interimTranscript);
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
             
-            // Update status
-            statusEl.innerHTML = `
-                <div class="flex items-center">
-                    <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                    Recording saved!
-                </div>
-            `;
+            if (event.error === 'no-speech') {
+                updateStatus('warning', 'No speech detected. Please speak now.');
+            } else if (event.error === 'audio-capture') {
+                showError("Microphone not found or not working properly.");
+            } else if (event.error === 'not-allowed') {
+                showError("Microphone permission denied. Please allow microphone access.");
+            } else {
+                showError(`Error: ${event.error}`);
+            }
+        };
+
+        recognition.onend = () => {
+            console.log("Speech recognition ended");
             
-            // Highlight the saved status with animation
-            statusEl.classList.add('bg-green-50');
-            setTimeout(() => {
-                statusEl.classList.remove('bg-green-50');
-                statusEl.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
-                        Ready to record
-                    </div>
-                `;
-            }, 2000);
-            
-        }, { once: true });
+            // Only reset if we're not intentionally stopping
+            if (isRecording) {
+                console.log("Attempting to restart recognition...");
+                try {
+                    // Auto-restart if it stopped unexpectedly
+                    recognition.start();
+                    updateStatus('recording', 'Recording resumed');
+                    setTimeout(() => {
+                        if (isRecording) {
+                            updateStatus('recording', 'Recording...');
+                        }
+                    }, 1500);
+                } catch (e) {
+                    console.error("Could not restart recognition:", e);
+                    setRecordingState(false);
+                    showError("Recording stopped unexpectedly. Please restart.");
+                }
+            }
+        };
+
+        recognition.start();
+
+        // Stop logic
+        stopBtn.addEventListener('click', stopRecording, { once: true });
 
     } catch (err) {
-        statusEl.innerHTML = `
-            <div class="flex items-center text-red-500">
-                <span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
-                Error: ${err.message}
-            </div>
-        `;
         console.error(err);
+        showError(`Error: ${err.message}`);
     }
 });
+
+function stopRecording() {
+    if (!recognition) return;
+    
+    isRecording = false;
+    recognition.stop();
+    setRecordingState(false);
+    
+    updateStatus('success', 'Recording completed');
+    
+    // Save transcription indicator
+    if (finalTranscript) {
+        transcriptionBox.classList.add('saved');
+        setTimeout(() => transcriptionBox.classList.remove('saved'), 1000);
+    }
+    
+    // Reset stopBtn event listener for next use
+    stopBtn.removeEventListener('click', stopRecording);
+}
+
+function setRecordingState(isActive) {
+    // Update button states
+    startBtn.disabled = isActive;
+    startBtn.classList.toggle('opacity-50', isActive);
+    startBtn.classList.toggle('cursor-not-allowed', isActive);
+    
+    stopBtn.disabled = !isActive;
+    stopBtn.classList.toggle('bg-gray-200', !isActive);
+    stopBtn.classList.toggle('text-gray-400', !isActive);
+    stopBtn.classList.toggle('cursor-not-allowed', !isActive);
+    stopBtn.classList.toggle('bg-red-600', isActive);
+    stopBtn.classList.toggle('hover:bg-red-700', isActive);
+    stopBtn.classList.toggle('text-white', isActive);
+    stopBtn.classList.toggle('shadow-md', isActive);
+    
+    // Show transcription area
+    transcriptionBox.classList.remove('hidden');
+    
+    // Update status
+    if (isActive) {
+        updateStatus('recording', 'Recording...');
+    } else {
+        updateStatus('ready', 'Ready to record');
+    }
+}
+
+function updateStatus(state, message) {
+    let indicator, classes;
+    
+    switch (state) {
+        case 'recording':
+            indicator = '<span class="w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>';
+            classes = 'text-red-700';
+            break;
+        case 'success':
+            indicator = '<span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>';
+            classes = 'text-green-700 bg-green-50 transition-all duration-500';
+            break;
+        case 'ready':
+            indicator = '<span class="w-2 h-2 rounded-full bg-blue-400 mr-2"></span>';
+            classes = 'text-blue-700';
+            break;
+        case 'warning':
+            indicator = '<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>';
+            classes = 'text-yellow-700';
+            break;
+        case 'error':
+            indicator = '<span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>';
+            classes = 'text-red-600';
+            break;
+    }
+    
+    statusEl.className = `flex items-center p-2 rounded ${classes}`;
+    statusEl.innerHTML = `<div class="flex items-center">${indicator}${message}</div>`;
+}
+
+function showError(message) {
+    updateStatus('error', message);
+    console.error(message);
+}
+
+function getConfidenceLevel(confidence) {
+    if (confidence > 0.9) return 'high';
+    if (confidence > 0.7) return 'medium';
+    return 'low';
+}
+
+function updateTranscriptionDisplay(interimText) {
+    // Create a container for better organization
+    let content = '';
+    
+    // Add the interim transcript if available
+    if (interimText) {
+        content += `
+            <div class="interim-container p-2 mb-3 bg-blue-50 border-l-2 border-blue-300 rounded">
+                <div class="text-sm text-blue-500 mb-1">Listening now...</div>
+                <div class="text-gray-700 italic">${interimText}</div>
+            </div>
+        `;
+    }
+    
+    // Add the final transcript
+    content += `
+        <div class="final-transcript">
+            ${finalTranscript || '<p class="text-gray-500">No transcription yet</p>'}
+        </div>
+    `;
+    
+    transcriptionBox.innerHTML = content;
+    
+    // Scroll to the bottom for new content
+    transcriptionBox.scrollTop = transcriptionBox.scrollHeight;
+}
