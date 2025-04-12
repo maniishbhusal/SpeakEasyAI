@@ -1,17 +1,54 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import openai
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 import json
 import os
 import tempfile
 from dotenv import load_dotenv
+from .models import TranscriptionRecord
 
 load_dotenv()
 
-def home(request):
-    return render(request, 'core/home.html')
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'core/login.html', {'form': form})
 
+def signup_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'core/signup.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+def home(request):
+    # Get user's transcription history
+    user_transcriptions = TranscriptionRecord.objects.filter(user=request.user).order_by('-created_at')[:5]
+    return render(request, 'core/home.html', {'transcriptions': user_transcriptions})
+
+@login_required
 @csrf_exempt
 def transcribe_audio(request):
     if request.method == "POST" and request.FILES.get('audio_file'):
@@ -36,11 +73,19 @@ def transcribe_audio(request):
                 
                 transcription = response.text
                 
+                # Save to database (without sentiment yet)
+                record = TranscriptionRecord(
+                    user=request.user,
+                    text=transcription
+                )
+                record.save()
+                
                 # Clean up the temporary file
                 os.unlink(temp_file_path)
                 
                 return JsonResponse({
-                    "transcription": transcription
+                    "transcription": transcription,
+                    "record_id": record.id
                 })
                 
             except Exception as e:
@@ -55,12 +100,14 @@ def transcribe_audio(request):
     
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+@login_required
 @csrf_exempt
 def analyze_sentiment(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             text = data.get("text", "")
+            record_id = data.get("record_id", None)
             
             if not text:
                 return JsonResponse({"error": "Missing text"}, status=400)
@@ -86,6 +133,17 @@ def analyze_sentiment(request):
             
             result = json.loads(response.choices[0].message.content)
             
+            # Update the database record with sentiment information if record_id is provided
+            if record_id:
+                try:
+                    record = TranscriptionRecord.objects.get(id=record_id, user=request.user)
+                    record.sentiment_score = result.get('sentiment', {}).get('score', 0)
+                    record.sentiment_label = result.get('sentiment', {}).get('label', 'NEUTRAL')
+                    record.sentiment_analysis = result.get('analysis', '')
+                    record.save()
+                except TranscriptionRecord.DoesNotExist:
+                    pass
+            
             return JsonResponse(result)
             
         except Exception as e:
@@ -93,3 +151,8 @@ def analyze_sentiment(request):
             return JsonResponse({"error": str(e)}, status=500)
     
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
+def transcription_history(request):
+    user_transcriptions = TranscriptionRecord.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'core/history.html', {'transcriptions': user_transcriptions})
