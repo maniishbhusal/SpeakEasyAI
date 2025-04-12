@@ -1,116 +1,113 @@
+"use client";
+
+import React from "react";
 import MaxWidthWrapper from "../MaxWidthWrapper";
-import { Check, Star, X } from "lucide-react";
+import { Mic, FileText, MessageCircle, FolderSearch } from "lucide-react";
+import { motion } from "framer-motion";
+
+const steps = [
+  {
+    title: "Before",
+    icon: <Mic className="h-8 w-8 text-[#9454AC]" />,
+    description:
+      "Meetings were chaotic and unorganized, with no follow-up clarity.",
+  },
+  {
+    title: "After",
+    icon: <FileText className="h-8 w-8 text-[#9454AC]" />,
+    description:
+      "Crystal-clear transcriptions and summarized insights after every call.",
+  },
+  {
+    title: "Before",
+    icon: <MessageCircle className="h-8 w-8 text-[#9454AC]" />,
+    description: "Struggled to remember what was discussed or promised.",
+  },
+  {
+    title: "After",
+    icon: <FolderSearch className="h-8 w-8 text-[#9454AC]" />,
+    description: "Smart dashboard organizes all your past meetings by topic.",
+  },
+];
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut",
+    },
+  },
+};
+
+const textVariants = {
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+};
 
 function BeforeAfter() {
   return (
-    <section className="bg-gradient-to-b from-white to-[#D4CFFA]/40">
-      <MaxWidthWrapper className="pb-10 pt-20">
-        {/* Headline Section */}
-        <div className="max-w-3xl mx-auto tracking-tight flex flex-col items-center justify-center gap-5">
-          <div className="flex items-center justify-center gap-1.5">
-            <X className="w-8 h-8 sm:w-6 sm:h-6 text-red-600" />
-            <h2 className="font-bold text-xl md:text-3xl text-center">
-              Traditional transcription tools are slow and unreliable
-            </h2>
-          </div>
+    <motion.section
+      variants={sectionVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+      className="bg-white py-20"
+    >
+      <MaxWidthWrapper className="text-center">
+        <motion.h2
+          variants={textVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="text-4xl font-extrabold tracking-tight text-gray-900 mb-4"
+        >
+          Before vs After
+        </motion.h2>
 
-          <div className="flex items-center justify-center gap-1.5">
-            <Check className="w-8 h-8 sm:w-6 sm:h-6 text-green-600" />
-            <h2 className="font-bold text-xl md:text-3xl text-center text-balance">
-              With SpeechEasyAI, transcribe smarter, communicate better
-            </h2>
-          </div>
-        </div>
+        <motion.p
+          variants={textVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="text-muted-foreground max-w-2xl mx-auto mb-12 text-lg"
+        >
+          See the transformation SpeakEasyAI brings to your meetings and
+          communication.
+        </motion.p>
 
-        {/* Before / After Grid */}
-        <div className="flex flex-col gap-10 lg:flex-row lg:max-w-4xl lg:mx-auto items-center justify-center lg:gap-14 my-16">
-          {/* Before */}
-          <div className="flex w-full sm:flex-1 flex-col items-center bg-primary-foreground rounded-2xl shadow-md py-12">
-            <ul className="text-left font-medium flex flex-col items-center sm:items-start">
-              <div className="space-y-2 tracking-wide text-xl">
-                <h3 className="font-bold mb-2">Before</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((step, index) => (
+            <div key={index} className="relative group">
+              {/* Always present soft gradient glow (faint) */}
+              <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-br from-purple-100 via-white to-pink-100 opacity-30 blur-md z-0 pointer-events-none shadow-4xl" />
 
-                <li className="flex gap-1.5 items-center text-left">
-                  <X className="h-4 w-4 shrink-0 text-red-500" />
-                  Manual transcription takes hours
-                </li>
-                <li className="flex gap-1.5 items-center text-left">
-                  <X className="h-4 w-4 shrink-0 text-red-500" />
-                  Accuracy issues and missed words
-                </li>
-                <li className="flex gap-1.5 items-center text-left">
-                  <X className="h-4 w-4 shrink-0 text-red-500" />
-                  No support for multiple languages
-                </li>
-                <li className="flex gap-1.5 items-center text-left">
-                  <X className="h-4 w-4 shrink-0 text-red-500" />
-                  No real-time transcription
-                </li>
+              {/* Hover glow (subtle but all-around border feel) */}
+              <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-purple-300 via-white to-pink-300 opacity-0 group-hover:opacity-80 blur-md transition-all duration-500 z-10 pointer-events-none" />
+
+              {/* Card Content */}
+              <div className="relative z-20 bg-white rounded-2xl shadow-md p-6 min-h-[260px] w-full flex flex-col justify-center items-center text-center transition-all duration-300">
+                <div className="mb-4">{step.icon}</div>
+                <h3 className="font-semibold text-lg mb-2 text-gray-800">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-gray-600">{step.description}</p>
               </div>
-            </ul>
-          </div>
-
-          {/* After */}
-          <div className="flex w-full sm:flex-1 flex-col items-center bg-primary/10 rounded-2xl shadow-md py-12">
-            <ul className="text-left font-medium flex flex-col items-center sm:items-start">
-              <div className="space-y-2 tracking-wide text-xl">
-                <h3 className="font-bold mb-2">After</h3>
-
-                <li className="flex gap-1.5 items-center text-left">
-                  <Check className="h-4 w-4 shrink-0 text-green-600" />
-                  Instant, real-time transcription
-                </li>
-                <li className="flex gap-1.5 items-center text-left">
-                  <Check className="h-4 w-4 shrink-0 text-green-600" />
-                  Over 95% accuracy with smart AI
-                </li>
-                <li className="flex gap-1.5 items-center text-left">
-                  <Check className="h-4 w-4 shrink-0 text-green-600" />
-                  Supports 50+ languages and dialects
-                </li>
-                <li className="flex gap-1.5 items-center text-left">
-                  <Check className="h-4 w-4 shrink-0 text-green-600" />
-                  Ideal for meetings, interviews & lectures
-                </li>
-              </div>
-            </ul>
-          </div>
-        </div>
-
-        {/* Testimonial */}
-        <div className="max-w-lg mx-auto my-20 flex flex-col items-center sm:items-start">
-          <div className="mx-auto flex items-center justify-center gap-1 mb-4">
-            {Array(5)
-              .fill()
-              .map((_, i) => (
-                <Star
-                  key={i}
-                  className="h-5 w-5 text-yellow-500 fill-yellow-500"
-                />
-              ))}
-          </div>
-
-          <div className="text-center font-semibold text-balance text-gray-800">
-            “I can't imagine my life without{" "}
-            <span className="bg-yellow-200 px-1">SpeechEasyAI</span>. It made my
-            meetings 10x more productive. Real-time subtitles, translations, and
-            crystal clear transcripts — all in seconds.”
-          </div>
-
-          <div className="flex mx-auto items-center justify-center gap-4 my-6">
-            <img
-              src="/users/john.png"
-              alt="user"
-              className="inline-block pointer-events-none object-cover h-12 w-12 rounded-full ring-2 ring-gray-300"
-            />
-            <div className="flex flex-col">
-              <p className="font-semibold">John D</p>
-              <p className="text-sm">Product Manager, Remote Co.</p>
             </div>
-          </div>
+          ))}
         </div>
       </MaxWidthWrapper>
-    </section>
+    </motion.section>
   );
 }
 

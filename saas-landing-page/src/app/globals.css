@@ -58,6 +58,43 @@
     --chart-5: 340 75% 55%;
   }
 }
+.glow-card {
+  position: relative;
+  z-index: 0;
+  transition: all 0.3s ease-in-out;
+}
+
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 1rem;
+  z-index: -1;
+  background: linear-gradient(135deg, #f9f1ff, #eabfff, #b88ce0, #ffffff);
+  background-size: 400% 400%;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease;
+}
+
+.glow-card:hover::before,
+.glow-card:focus::before {
+  opacity: 1;
+  animation: glowPulse 3s ease infinite;
+  transform: scale(1.02);
+}
+
+@keyframes glowPulse {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 
 @layer base {
   * {

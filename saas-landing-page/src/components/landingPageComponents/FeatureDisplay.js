@@ -1,42 +1,100 @@
-import { Sparkle, } from 'lucide-react';
+"use client";
+
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
+
+const imageVariants = {
+  hidden: { opacity: 0, x: 50 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
+
+const textVariants = {
+  hidden: { opacity: 0, x: -50 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 function FeatureDisplay() {
-    return (
-        <section className="bg-slate-50 py-24 pb-16">
-            <div className='max-w-sm sm:max-w-2xl lg:max-w-3xl mx-auto flex flex-col gap-4'>
-                <div className='flex justify-center'>
-                    <img src="storylanding.png"
-                    className='h-52 '
-                    />
-                </div>
-                <h2 className='tracking-tight font-bold text-center md:text-left text-3xl lg:text-5xl lg:leading-[3.5rem]'>
-                    All you need to do Lorem ipsum dolor sit amet consectetur
-                </h2>
-                <p className='font-semibold my-4 text-center md:text-left text-gray-700'>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. In minima incidunt, rerum quia asperiores fugit ipsam. Labore iusto dolor autem. Lorem ipsum dolor sit amet consectetur adipisicing el
-                </p>
+  const features = [
+    { name: "Smartpost Meeting Reports", image: "meeting.png" },
+    { name: "Emotion & Engagement Timeline", image: "emotional.png" },
+    { name: "AI Powered Communication Tips", image: "communication.png" },
+    { name: "Privacy First Design", image: "privacy.png" },
+  ];
 
-                <div className='flex flex-wrap md:flex-nowrap items-center justify-center md:justify-between gap-8 md:gap-0 mt-4'>
-                    <div className='flex flex-col items-center gap-2 group cursor-pointer'>
-                        <Sparkle className={`h-5 w-5 md:h-10 md:w-10group-hover:text-gray-600 transition-colors duration-200`} />
-                        <p className={`text-sm font-semibold  group-hover:text-gray-600 transition-colors duration-200`}>Feature One</p>
-                    </div>
-                    <div className='flex flex-col items-center gap-2 group cursor-pointer'>
-                        <Sparkle className={`h-5 w-5 md:h-10 md:w-10group-hover:text-gray-600 transition-colors duration-200`} />
-                        <p className={`text-sm font-semibold  group-hover:text-gray-600 transition-colors duration-200`}>Feature Two</p>
-                    </div>
-                    <div className='flex flex-col items-center gap-2 group cursor-pointer'>
-                        <Sparkle className={`h-5 w-5 md:h-10 md:w-10group-hover:text-gray-600 transition-colors duration-200`} />
-                        <p className={`text-sm font-semibold  group-hover:text-gray-600 transition-colors duration-200`}>Feature Three</p>
-                    </div>
-                    <div className='flex flex-col items-center gap-2 group cursor-pointer'>
-                        <Sparkle className={`h-5 w-5 md:h-10 md:w-10group-hover:text-gray-600 transition-colors duration-200`} />
-                        <p className={`text-sm font-semibold  group-hover:text-gray-600 transition-colors duration-200`}>Feature Four</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    )
+  return (
+    <section className="bg-slate-50 py-24 pb-16">
+      <div className="max-w-sm sm:max-w-2xl lg:max-w-6xl mx-auto flex flex-col gap-6">
+        <motion.div
+          variants={imageVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          className="flex justify-center"
+        ></motion.div>
+
+        <motion.p
+          variants={textVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          className="font-semibold my-4 text-center text-gray-700 text-xl sm:text-2xl"
+        >
+          SpeakEasyAI helps you analyze your meetings with AI—get
+          transcriptions, emotional timelines, and smart feedback.
+        </motion.p>
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-10"
+        >
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              variants={cardVariants}
+              className="bg-white border border-gray-200 rounded-2xl shadow-lg p-8 flex flex-col items-center text-center hover:shadow-xl hover:border-indigo-400 transition-all duration-300"
+            >
+              <img
+                src={feature.image}
+                alt={feature.name}
+                className="h-25 w-25 mb-6"
+              />
+              <p className="text-lg font-semibold text-gray-800">
+                {feature.name}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
 }
 
-export default FeatureDisplay
+export default FeatureDisplay;
