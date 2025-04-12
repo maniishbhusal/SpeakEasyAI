@@ -1,54 +1,123 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}SpeechEasyAI{% endblock title %}
+{% block title %}SpeechEasyAI - Sentiment Analysis{% endblock title %}
+
+{% block extra_head %}
+<style>
+    .sentiment-positive { background-color: #d1fae5; border-color: #6ee7b7; color: #047857; }
+    .sentiment-negative { background-color: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
+    .sentiment-neutral { background-color: #f3f4f6; border-color: #d1d5db; color: #4b5563; }
+    
+    @keyframes pulse-recording {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .recording-pulse {
+        animation: pulse-recording 2s infinite;
+    }
+</style>
+{% endblock extra_head %}
 
 {% block content %}
-<!-- Extension Popup -->
-<div class="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 transform transition duration-300 hover:shadow-2xl">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-5 text-white">
-        <div class="flex items-center space-x-2">
-            <div class="bg-white bg-opacity-20 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
+<div class="w-full max-w-6xl flex flex-col lg:flex-row gap-6">
+    <!-- Main Content Area -->
+    <div class="flex-1">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-5 text-white">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight">SpeechEasyAI</h1>
+                </div>
+                <p class="text-primary-100 text-sm mt-1">Audio Analysis Dashboard</p>
             </div>
-            <h1 class="text-2xl font-bold tracking-tight">SpeechEasyAI</h1>
+
+            <!-- Main Content -->
+            <div class="p-5">
+                <!-- Voice Recording Controls -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200 flex flex-col items-center justify-center">
+                    <div id="recordingIndicator" class="mb-4 hidden">
+                        <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center recording-pulse">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                        </div>
+                        <p class="text-red-600 font-medium text-center mt-2">Recording in progress</p>
+                    </div>
+                    
+                    <div class="flex gap-4 w-full max-w-md">
+                        <button id="startBtn" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-4 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                            <span>Record</span>
+                        </button>
+                        <button id="stopBtn" disabled class="flex-1 bg-gray-200 text-gray-400 py-4 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 cursor-not-allowed focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                            </svg>
+                            <span>Stop</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Status Bar -->
+                <div id="status" class="p-3 bg-blue-50 text-blue-700 rounded-lg mb-6 flex items-center justify-center">
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
+                        Ready to record
+                    </div>
+                </div>
+                
+                <!-- Meeting Summary Card - Only shown after analysis is complete -->
+                <div id="meetingSummary" class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm mb-6 hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Meeting Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="w-24 text-sm text-gray-500">Duration:</div>
+                            <div id="meetingDuration" class="font-medium">--:--</div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-24 text-sm text-gray-500">Topics:</div>
+                            <div id="meetingTopics" class="font-medium">Not analyzed yet</div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-24 text-sm text-gray-500">Sentiment:</div>
+                            <div id="meetingSentiment" class="font-medium">Not analyzed yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="text-primary-100 text-sm mt-1">Convert your speech to text with AI</p>
     </div>
-
-    <!-- Main Content -->
-    <div class="p-5">
-        <!-- Transcription Box -->
-        <div id="transcription" class="h-48 mb-5 p-4 bg-gray-50 rounded-lg overflow-y-auto hidden border border-gray-200 shadow-inner-lg transition-all duration-300">
-            <p class="text-gray-500 italic">Your transcription will appear here...</p>
-        </div>
-
-        <!-- Controls -->
-        <div class="flex gap-3">
-            <button id="startBtn" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-                <span>Start Recording</span>
-            </button>
-            <button id="stopBtn" disabled class="flex-1 bg-gray-200 text-gray-400 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 cursor-not-allowed focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                </svg>
-                <span>Stop Recording</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Status Bar -->
-    <div id="status" class="px-5 py-3 bg-gray-50 text-sm text-gray-500 border-t border-gray-200 flex items-center justify-center">
-        <div class="flex items-center">
-            <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
-            Ready to record
+    
+    <!-- Sidebar -->
+    <div class="w-full lg:w-2/5">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 h-full flex flex-col">
+            <!-- Sidebar Header -->
+            <div class="bg-gray-50 p-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800">Analysis Results</h2>
+            </div>
+            
+            <!-- Transcription Area -->
+            <div class="flex-1 overflow-auto">
+                <div id="transcription" class="p-5 hidden">
+                    <p class="text-gray-500 italic">Your transcription will appear here...</p>
+                </div>
+                
+                <!-- Sentiment Analysis -->
+                <div id="sentimentAnalysis" class="p-5 border-t border-gray-100 hidden">
+                    <!-- Content will be added dynamically -->
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -56,4 +125,14 @@
 
 {% block scripts %}
 <script src="{% static 'core/script.js' %}"></script>
+<script>
+    // Show/hide recording indicator
+    document.getElementById('startBtn').addEventListener('click', function() {
+        document.getElementById('recordingIndicator').classList.remove('hidden');
+    });
+    
+    document.getElementById('stopBtn').addEventListener('click', function() {
+        document.getElementById('recordingIndicator').classList.add('hidden');
+    });
+</script>
 {% endblock scripts %}
