@@ -23,10 +23,13 @@ In fast-paced team environments, crucial emotional cues are often missed during 
                          ↓
          [Whisper AI Transcription Service]
                          ↓
-     [OpenAI Sentiment Analysis via GPT-4 Turbo]
+     [OpenAI Sentiment Analysis via GPT-4o]
                          ↓
     → Transcription & Sentiment JSON Response → [Frontend Dashboard]
 ```
+
+<img src="https://github.com/user-attachments/assets/1904bb54-3c50-48d2-b831-afb5df1fcbb8" width="400"/>
+
 
 ---
 
