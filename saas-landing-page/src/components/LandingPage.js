@@ -18,7 +18,7 @@ function LandingPage() {
       <DemoSection />
       <PricingSection />
       {/* <FaqSection /> */}
-      <AsSeenOn />
+      {/* <AsSeenOn /> */}
       {/* <Testimonials /> */}
       <FinalPush />
       <Footer />
