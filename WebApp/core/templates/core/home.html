@@ -1,59 +1,470 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}SpeechEasyAI{% endblock title %}
+{% block title %}SpeechEasyAI - Sentiment Analysis{% endblock title %}
+
+{% block extra_head %}
+<style>
+    .sentiment-positive { background-color: #d1fae5; border-color: #6ee7b7; color: #047857; }
+    .sentiment-negative { background-color: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
+    .sentiment-neutral { background-color: #f3f4f6; border-color: #d1d5db; color: #4b5563; }
+    
+    @keyframes pulse-recording {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .recording-pulse {
+        animation: pulse-recording 2s infinite;
+    }
+</style>
+{% endblock extra_head %}
 
 {% block content %}
-<!-- Extension Popup -->
-<div class="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 transform transition duration-300 hover:shadow-2xl">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-5 text-white">
-        <div class="flex items-center space-x-2">
-            <div class="bg-white bg-opacity-20 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
+<div class="w-full max-w-6xl flex flex-col lg:flex-row gap-6">
+    <!-- Main Content Area -->
+    <div class="flex-1">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-5 text-white">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                        </div>
+                        <h1 class="text-2xl font-bold tracking-tight">SpeechEasyAI</h1>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a href="{% url 'history' %}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+                            History
+                        </a>
+                        <a href="{% url 'logout' %}" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
+                            Logout
+                        </a>
+                    </div>
+                </div>
+                <p class="text-primary-100 text-sm mt-1">Audio Analysis Dashboard</p>
             </div>
-            <h1 class="text-2xl font-bold tracking-tight">SpeechEasyAI</h1>
+
+            <!-- Main Content -->
+            <div class="p-5">
+                <!-- User welcome message -->
+                <div class="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-100">
+                    <p class="text-blue-800">Welcome, <span class="font-medium">{{ request.user.username }}</span>! Your recordings will be saved to your account.</p>
+                </div>
+                
+                <!-- Voice Recording Controls -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200 flex flex-col items-center justify-center">
+                    <div id="recordingIndicator" class="mb-4 hidden">
+                        <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center recording-pulse">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                        </div>
+                        <p class="text-red-600 font-medium text-center mt-2">Recording in progress</p>
+                    </div>
+                    
+                    <div class="flex gap-4 w-full max-w-md">
+                        <button id="startBtn" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-4 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                            <span>Analyze Meeting</span>
+                        </button>
+                        <button id="stopBtn" disabled class="flex-1 bg-gray-200 text-gray-400 py-4 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 cursor-not-allowed focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                            </svg>
+                            <span>Stop</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="status" class="p-3 bg-blue-50 text-blue-700 rounded-lg mb-6 flex items-center justify-center">
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
+                        Ready to record
+                    </div>
+                </div>
+                
+                <!-- Recent Transcriptions Preview -->
+                {% if transcriptions %}
+                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Recent Transcriptions</h3>
+                        <a href="{% url 'history' %}" class="text-primary-600 hover:text-primary-800 text-sm font-medium">View all</a>
+                    </div>
+                    <div class="space-y-4">
+                        {% for transcription in transcriptions %}
+                        <div class="border-b border-gray-100 pb-3 {% if not forloop.last %}mb-3{% endif %}">
+                            <div class="flex justify-between">
+                                <p class="text-xs text-gray-500">{{ transcription.created_at|date:"F j, Y, g:i a" }}</p>
+                                {% if transcription.sentiment_label %}
+                                <span class="
+                                    {% if transcription.sentiment_label == 'POSITIVE' %}
+                                        bg-green-100 text-green-700
+                                    {% elif transcription.sentiment_label == 'NEGATIVE' %}
+                                        bg-red-100 text-red-700
+                                    {% else %}
+                                        bg-gray-100 text-gray-700
+                                    {% endif %}
+                                    px-2 py-1 rounded-full text-xs">
+                                    {{ transcription.sentiment_label }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <p class="mt-1 text-gray-800 line-clamp-2">{{ transcription.text|truncatechars:150 }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Meeting Summary Card - Only shown after analysis is complete -->
+                <div id="meetingSummary" class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm mb-6 hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Meeting Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="w-24 text-sm text-gray-500">Duration:</div>
+                            <div id="meetingDuration" class="font-medium">--:--</div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-24 text-sm text-gray-500">Topics:</div>
+                            <div id="meetingTopics" class="font-medium">Not analyzed yet</div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-24 text-sm text-gray-500">Sentiment:</div>
+                            <div id="meetingSentiment" class="font-medium">Not analyzed yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="text-primary-100 text-sm mt-1">Convert your speech to text with AI</p>
     </div>
-
-    <!-- Main Content -->
-    <div class="p-5">
-        <!-- Transcription Box -->
-        <div id="transcription" class="h-48 mb-5 p-4 bg-gray-50 rounded-lg overflow-y-auto hidden border border-gray-200 shadow-inner-lg transition-all duration-300">
-            <p class="text-gray-500 italic">Your transcription will appear here...</p>
-        </div>
-
-        <!-- Controls -->
-        <div class="flex gap-3">
-            <button id="startBtn" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-                <span>Start Recording</span>
-            </button>
-            <button id="stopBtn" disabled class="flex-1 bg-gray-200 text-gray-400 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 cursor-not-allowed focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                </svg>
-                <span>Stop Recording</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Status Bar -->
-    <div id="status" class="px-5 py-3 bg-gray-50 text-sm text-gray-500 border-t border-gray-200 flex items-center justify-center">
-        <div class="flex items-center">
-            <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
-            Ready to record
+    
+    <!-- Sidebar -->
+    <div class="w-full lg:w-2/5">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 h-full flex flex-col">
+            <!-- Sidebar Header -->
+            <div class="bg-gray-50 p-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800">Analysis Results</h2>
+            </div>
+            
+            <!-- Transcription Area -->
+            <div class="flex-1 overflow-auto">
+                <div id="transcription" class="p-5 hidden">
+                    <p class="text-gray-500 italic">Your transcription will appear here...</p>
+                </div>
+                
+                <!-- Sentiment Analysis -->
+                <div id="sentimentAnalysis" class="p-5 border-t border-gray-100 hidden">
+                    <!-- Content will be added dynamically -->
+                </div>
+            </div>
         </div>
     </div>
 </div>
 {% endblock content %}
 
 {% block scripts %}
-<script src="{% static 'core/script.js' %}"></script>
+<script>
+    // Store record ID for later use with sentiment analysis
+    let currentRecordId = null;
+    
+    function getCSRFToken() {
+      const cookieValue = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("csrftoken="));
+      return cookieValue ? cookieValue.split("=")[1] : "";
+    }
+    
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const transcriptionBox = document.getElementById("transcription");
+    const statusEl = document.getElementById("status");
+    const sentimentBox = document.getElementById("sentimentAnalysis");
+    
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    
+    startBtn.addEventListener("click", async () => {
+      try {
+        // Reset the transcription area if starting a new recording
+        transcriptionBox.innerHTML = '<p class="text-gray-500">Recording in progress...</p>';
+        transcriptionBox.classList.remove("hidden");
+        audioChunks = [];
+    
+        // Check for browser support
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showError("Media recording not supported in this browser. Please try Chrome, Edge, or Safari.");
+          return;
+        }
+    
+        // Get access to the microphone
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        // Create a new MediaRecorder instance
+        mediaRecorder = new MediaRecorder(stream);
+        
+        // Update UI for recording state
+        setRecordingState(true);
+    
+        // Event handler for when data is available
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+    
+        // Event handler for when recording stops
+        mediaRecorder.onstop = async () => {
+          // Create a blob from the audio chunks
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          
+          // Update status
+          updateStatus("processing", "Processing audio...");
+          
+          // Create a FormData object to send the audio file
+          const formData = new FormData();
+          formData.append("audio_file", audioBlob, "recording.webm");
+          
+          try {
+            // Send the audio to the backend for Whisper API transcription
+            const response = await fetch("/api/transcribe-audio/", {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCSRFToken(),
+              },
+              body: formData,
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Server responded with ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+              showError(`Transcription error: ${data.error}`);
+              return;
+            }
+            
+            // Store record ID for sentiment analysis
+            if (data.record_id) {
+                currentRecordId = data.record_id;
+            }
+            
+            // Display the transcription
+            displayTranscription(data.transcription);
+            
+            // Now that we have the transcription, send it for sentiment analysis
+            if (data.transcription.trim()) {
+              updateStatus("analyzing", "Analyzing sentiment...");
+              await analyzeSentiment(data.transcription);
+            }
+          } catch (error) {
+            console.error("Error processing audio:", error);
+            showError(`Error: ${error.message}`);
+          }
+        };
+    
+        // Start recording
+        mediaRecorder.start();
+        console.log("Recording started");
+    
+      } catch (err) {
+        console.error(err);
+        showError(`Error: ${err.message}`);
+        setRecordingState(false);
+      }
+    });
+    
+    stopBtn.addEventListener("click", () => {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        setRecordingState(false);
+        updateStatus("success", "Recording completed");
+        
+        // Stop all audio tracks to release the microphone
+        if (mediaRecorder.stream) {
+          mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+      }
+    });
+    
+    function setRecordingState(isActive) {
+      isRecording = isActive;
+      
+      // Update button states
+      startBtn.disabled = isActive;
+      startBtn.classList.toggle("opacity-50", isActive);
+      startBtn.classList.toggle("cursor-not-allowed", isActive);
+    
+      stopBtn.disabled = !isActive;
+      stopBtn.classList.toggle("bg-gray-200", !isActive);
+      stopBtn.classList.toggle("text-gray-400", !isActive);
+      stopBtn.classList.toggle("cursor-not-allowed", !isActive);
+      stopBtn.classList.toggle("bg-red-600", isActive);
+      stopBtn.classList.toggle("hover:bg-red-700", isActive);
+      stopBtn.classList.toggle("text-white", isActive);
+      stopBtn.classList.toggle("shadow-md", isActive);
+    
+      // Show transcription area
+      transcriptionBox.classList.remove("hidden");
+    
+      // Update status
+      if (isActive) {
+        updateStatus("recording", "Recording...");
+      } else {
+        updateStatus("ready", "Ready to record");
+      }
+      
+      // Show/hide recording indicator
+      document.getElementById('recordingIndicator').classList.toggle('hidden', !isActive);
+    }
+    
+    function updateStatus(state, message) {
+      let indicator, classes;
+    
+      switch (state) {
+        case "recording":
+          indicator = '<span class="w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>';
+          classes = "text-red-700";
+          break;
+        case "processing":
+          indicator = '<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2 animate-pulse"></span>';
+          classes = "text-yellow-700";
+          break;
+        case "analyzing":
+          indicator = '<span class="w-2 h-2 rounded-full bg-blue-500 mr-2 animate-pulse"></span>';
+          classes = "text-blue-700";
+          break;
+        case "success":
+          indicator = '<span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>';
+          classes = "text-green-700 bg-green-50 transition-all duration-500";
+          break;
+        case "ready":
+          indicator = '<span class="w-2 h-2 rounded-full bg-blue-400 mr-2"></span>';
+          classes = "text-blue-700";
+          break;
+        case "warning":
+          indicator = '<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>';
+          classes = "text-yellow-700";
+          break;
+        case "error":
+          indicator = '<span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>';
+          classes = "text-red-600";
+          break;
+      }
+    
+      statusEl.className = `flex items-center p-2 rounded ${classes}`;
+      statusEl.innerHTML = `<div class="flex items-center">${indicator}${message}</div>`;
+    }
+    
+    function showError(message) {
+      updateStatus("error", message);
+      console.error(message);
+    }
+    
+    function displayTranscription(text) {
+      if (!text || text.trim() === "") {
+        transcriptionBox.innerHTML = '<p class="text-gray-500">No transcription available</p>';
+        return;
+      }
+      
+      // Format paragraphs
+      const formattedText = text
+        .split("\n")
+        .filter(line => line.trim() !== "")
+        .map(line => `<p class="mb-2">${line}</p>`)
+        .join("");
+      
+      transcriptionBox.innerHTML = `
+        <div class="text-sm font-medium text-primary-700 mb-2">Transcription:</div>
+        <div class="text-gray-800">${formattedText}</div>
+      `;
+      
+      // Add a transition effect
+      transcriptionBox.classList.add("bg-blue-50", "border-blue-200");
+      setTimeout(() => {
+        transcriptionBox.classList.remove("bg-blue-50", "border-blue-200");
+      }, 1000);
+      
+      // Scroll to the bottom for new content
+      transcriptionBox.scrollTop = transcriptionBox.scrollHeight;
+    }
+    
+    async function analyzeSentiment(text) {
+      try {
+        const response = await fetch("/api/analyze-sentiment/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+          },
+          body: JSON.stringify({
+            text: text,
+            record_id: currentRecordId // Include the record ID in the request
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Server responded with ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Display sentiment analysis results
+        if (sentimentBox) {
+          displaySentimentAnalysis(data);
+        }
+        
+        updateStatus("success", "Analysis complete");
+        
+        // After successful analysis, refresh the page to show the new transcription in the history
+        // Alternatively, you could fetch just the new data without a full page refresh
+        // setTimeout(() => window.location.reload(), 2000);
+      } catch (error) {
+        console.error("Error analyzing sentiment:", error);
+        showError(`Sentiment analysis error: ${error.message}`);
+      }
+    }
+    
+    function displaySentimentAnalysis(data) {
+      if (!data || !sentimentBox) return;
+      
+      // Get the sentiment score and determine the color
+      const sentiment = data.sentiment || {};
+      const score = sentiment.score || 0;
+      
+      let sentimentClass, sentimentText;
+      
+      if (score > 0.25) {
+        sentimentClass = "bg-green-100 border-green-300 text-green-800";
+        sentimentText = "Positive";
+      } else if (score < -0.25) {
+        sentimentClass = "bg-red-100 border-red-300 text-red-800";
+        sentimentText = "Negative";
+      } else {
+        sentimentClass = "bg-gray-100 border-gray-300 text-gray-800";
+        sentimentText = "Neutral";
+      }
+      
+      // Format the sentiment display
+      sentimentBox.innerHTML = `
+        <div class="text-sm font-medium text-primary-700 mb-2">Sentiment Analysis:</div>
+        <div class="p-3 rounded-lg ${sentimentClass} mb-3">
+          <div class="font-medium">${sentimentText} (${(score * 100).toFixed(1)}%)</div>
+          ${data.analysis ? `<p class="text-sm mt-1">${data.analysis}</p>` : ''}
+        </div>
+      `;
+      
+      sentimentBox.classList.remove("hidden");
+    }
+</script>
 {% endblock scripts %}
