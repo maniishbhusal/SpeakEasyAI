@@ -1,4 +1,5 @@
 "use client";
+import Iframe from "react-iframe";
 
 import {
   Chrome,
@@ -246,16 +247,42 @@ export default function InstallExtensionCTA() {
                     <Download className="w-3 h-3 text-white" />
                   </div>
                 </div>
+                {/* 
+                <a
+                  href="https://www.youtube.com/watch?v=2ZIpFytCSVc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <iframe
+                    className="w-full aspect-video"
+                    src="https://www.youtube.com/embed/i96UO8-GFvw"
+                    title="AI Tutorial by Edureka"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </a> */}
 
-                {/* Video Element */}
-                <iframe
-                  className="w-full aspect-video"
-                  src="https://www.youtube.com/embed/YOUR_VIDEO_ID" // Replace with your demo video
-                  title="SpeakEasyAI Demo Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                <a
+                  href="https://www.youtube.com/watch?v=i96UO8-GFvw&list=RDi96UO8-GFvw&start_radio=1&ab_channel=TheLocalTrain"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative block w-full aspect-video overflow-hidden rounded-2xl border border-white/20 shadow-2xl group"
+                >
+                  {/* Thumbnail */}
+                  <img
+                    src="https://img.youtube.com/vi/2ZIpFytCSVc/hqdefault.jpg"
+                    alt="Demo Video"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+
+                  {/* Overlay Play Button */}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-300 group-hover:bg-black/50">
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
+                      <div className="w-0 h-0 border-y-8 border-y-transparent border-l-12 border-l-indigo-600 ml-1"></div>
+                    </div>
+                  </div>
+                </a>
 
                 {/* Play Button Overlay */}
                 <motion.div

@@ -299,17 +299,17 @@ function FinalPush() {
             >
               <div className="flex -space-x-3">
                 <img
-                  src="/avatar1.jpg"
+                  src="/users/boy1.jpg"
                   alt="User"
                   className="w-8 h-8 rounded-full border-2 border-purple-600"
                 />
                 <img
-                  src="/avatar2.jpg"
+                  src="/users/boy2.jpg"
                   alt="User"
                   className="w-8 h-8 rounded-full border-2 border-purple-600"
                 />
                 <img
-                  src="/avatar3.jpg"
+                  src="/users/boy3.jpg"
                   alt="User"
                   className="w-8 h-8 rounded-full border-2 border-purple-600"
                 />

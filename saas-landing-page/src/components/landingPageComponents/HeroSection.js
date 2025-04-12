@@ -118,7 +118,7 @@ function HeroSection() {
               Talk like a pro, Learn like a coach, Grow every meeting
               </h1>
 
-              <p className="mt-6 text-lg max-w-prose text-center lg:text-left font-medium text-gray-700 text-balance">
+              <p className="mt-6 text-lg max-w-prose text-center lg:text-left  text-gray-700 text-balance">
                 SpeakEasyAI is an AI-powered extension that transcribes,
                 analyzes emotions, and provides smart insights to improve your
                 meetings and communication.
@@ -156,10 +156,10 @@ function HeroSection() {
                 className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3"
               >
                 {[
-                  { icon: Mic, text: "Real-time transcription" },
-                  { icon: Brain, text: "Emotion analysis" },
+                  { icon: Mic, text: "Transcription" },
+                  { icon: Brain, text: "Sentimental analysis" },
                   { icon: Sparkles, text: "Smart insights" },
-                  { icon: CheckCircle2, text: "Meeting summaries" },
+                  { icon: CheckCircle2, text: "Chatbot" },
                 ].map((feature, i) => (
                   <motion.div
                     key={i}
@@ -175,7 +175,7 @@ function HeroSection() {
               {/* User Avatars and Ratings */}
               <div className="mt-10 flex flex-col sm:flex-row sm:items-start items-center gap-5">
                 <div className="flex -space-x-3">
-                  {["user-1", "user-2", "user-3", "user-4", "user-5"].map(
+                  {["boy1", "boy2", "boy3", "boy4", "girl1"].map(
                     (user, i) => (
                       <motion.img
                         key={i}
@@ -183,7 +183,7 @@ function HeroSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8 + i * 0.1, duration: 0.5 }}
                         viewport={{ once: true }}
-                        src={`/users/${user}.png`}
+                        src={`/users/${user}.jpg`}
                         alt="user image"
                         className="h-10 w-10 rounded-full ring-2 ring-white bg-white shadow-md"
                       />

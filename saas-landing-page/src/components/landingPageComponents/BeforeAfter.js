@@ -16,28 +16,26 @@ import { motion } from "framer-motion";
 const steps = [
   {
     before: {
-      title: "Chaotic Meetings",
+      title: "Listen",
       icon: <XCircle className="h-10 w-10 text-red-500" />,
-      description:
-        "Meetings were chaotic and unorganized, with no follow-up clarity.",
+      description: "Manually track and understand conversation.",
     },
     after: {
-      title: "Crystal Clear",
+      title: "Transcribe",
       icon: <FileText className="h-10 w-10 text-[#9454AC]" />,
-      description:
-        "Crystal-clear transcriptions and summarized insights after every call.",
+      description: "We transcribe speech into text",
     },
   },
   {
     before: {
-      title: "Lost Information",
+      title: "Sentimental Analysis",
       icon: <XCircle className="h-10 w-10 text-red-500" />,
-      description: "Struggled to remember what was discussed or promised.",
+      description: "No clue about speaker's emotions.",
     },
     after: {
-      title: "Smart Organization",
+      title: "Feedback",
       icon: <CheckCircle className="h-10 w-10 text-[#9454AC]" />,
-      description: "Smart dashboard organizes all your past meetings by topic.",
+      description: "feedback about personal growth",
     },
   },
 ];
@@ -138,9 +136,9 @@ function BeforeAfter() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-800 via-purple-600 to-indigo-700"
+          className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-800 via-purple-600 to-indigo-700"
         >
-          Before vs After
+          How it Works
         </motion.h2>
 
         <motion.p
