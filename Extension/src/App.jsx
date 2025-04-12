@@ -1,12 +1,17 @@
-import "./App.css";
-import SpeakCom from "./components/SpeakCom";
+import React from "react";
 
 function App() {
   return (
-    <>
-      hello
-      <SpeakCom />
-    </>
+    <div style={{ padding: "20px", width: "200px" }}>
+      <button
+        onClick={() => {
+          // Open Google.com in a new tab
+          chrome.tabs.create({ url: "https://google.com" });
+        }}
+      >
+        Go to Google
+      </button>
+    </div>
   );
 }
 
