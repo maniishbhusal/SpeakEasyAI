@@ -24,7 +24,7 @@ export default function SignInForm() {
       // Simulated login logic (dummy credentials)
       if (email === "test@example.com" && password === "password") {
         localStorage.setItem("loggedIn", "true");
-        router.push("/http://127.0.0.1:8000/");
+        router.push("http://127.0.0.1:8000");
       } else {
         setError("Invalid email or password. Try test@example.com / password");
       }

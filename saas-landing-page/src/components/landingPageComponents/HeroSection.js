@@ -159,7 +159,7 @@ function HeroSection() {
                   { icon: Mic, text: "Transcription" },
                   { icon: Brain, text: "Sentimental analysis" },
                   { icon: Sparkles, text: "Smart insights" },
-                  { icon: CheckCircle2, text: "Chatbot" },
+                  { icon: CheckCircle2, text: "feedback" },
                 ].map((feature, i) => (
                   <motion.div
                     key={i}
