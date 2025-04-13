@@ -1,5 +1,4 @@
 "use client";
-import Iframe from "react-iframe";
 
 import {
   Chrome,
