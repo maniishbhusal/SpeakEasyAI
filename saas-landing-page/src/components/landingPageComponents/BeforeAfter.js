@@ -10,6 +10,7 @@ import {
   ArrowRight,
   CheckCircle,
   XCircle,
+  HeartPulse,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -17,7 +18,7 @@ const steps = [
   {
     before: {
       title: "Listen",
-      icon: <XCircle className="h-10 w-10 text-red-500" />,
+      icon: <Mic className="h-8 w-8 text-purple-400" />,
       description: "Manually track and understand conversation.",
     },
     after: {
@@ -29,13 +30,13 @@ const steps = [
   {
     before: {
       title: "Sentimental Analysis",
-      icon: <XCircle className="h-10 w-10 text-red-500" />,
+      icon: <HeartPulse className="h-8 w-8 text-purple-400" />,
       description: "No clue about speaker's emotions.",
     },
     after: {
       title: "Feedback",
       icon: <CheckCircle className="h-10 w-10 text-[#9454AC]" />,
-      description: "feedback about personal growth",
+      description: "feedback about personal",
     },
   },
 ];
@@ -169,14 +170,14 @@ function BeforeAfter() {
                 onMouseEnter={() => setHoveredCard(`before-${index}`)}
                 onMouseLeave={() => setHoveredCard(null)}
               >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-red-200 to-red-300 rounded-2xl opacity-75 blur group-hover:opacity-100 transition duration-300"></div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-200 to-purple-300 rounded-2xl opacity-75 blur group-hover:opacity-100 transition duration-300"></div>
                 <div
                   className={`relative bg-white rounded-2xl shadow-lg p-8 transition-all duration-500 transform ${
                     hoveredCard === `before-${index}` ? "scale-105" : ""
                   }`}
                 >
-                  <div className="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
-                    <XCircle className="h-8 w-8 text-red-500" />
+                  <div className="bg-purple-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
+                    {step.before.icon}
                   </div>
                   <h3 className="font-bold text-xl mb-3 text-gray-800">
                     {step.before.title}

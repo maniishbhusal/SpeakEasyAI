@@ -147,7 +147,7 @@ function FeatureDisplay() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
-          className="font-medium my-4 text-center text-gray-700 text-xl sm:text-2xl max-w-3xl mx-auto"
+          className="text-muted-foreground max-w-2xl mx-auto mb-16 text-lg"
         >
           SpeakEasyAI helps you analyze your meetings with AI—get
           transcriptions, emotional timelines, and smart feedback.
@@ -286,4 +286,4 @@ function FeatureDisplay() {
   );
 }
 
-export default FeatureDisplay; 
+export default FeatureDisplay;
