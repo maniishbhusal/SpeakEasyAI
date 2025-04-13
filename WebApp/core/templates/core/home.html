@@ -847,101 +847,141 @@ Sentiment Analysis{% endblock title %} {% block extra_head %}
     // Get the sentiment score and determine the color
     const sentiment = data.sentiment || {};
     const score = sentiment.score || 0;
-
-    let sentimentClass, sentimentText, sentimentIcon;
-
-    if (score > 0.25) {
-      sentimentClass = "bg-green-100 border-green-200 text-green-800";
-      sentimentText = "Positive";
-      sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>`;
-    } else if (score < -0.25) {
-      sentimentClass = "bg-red-100 border-red-200 text-red-800";
-      sentimentText = "Negative";
-      sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>`;
+    const label = sentiment.label || "NEUTRAL";
+    
+    let sentimentClass, sentimentIcon;
+    if (label === "POSITIVE") {
+        sentimentClass = "bg-green-100 border-green-200 text-green-800";
+        sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>`;
+    } else if (label === "NEGATIVE") {
+        sentimentClass = "bg-red-100 border-red-200 text-red-800";
+        sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>`;
     } else {
-      sentimentClass = "bg-gray-100 border-gray-200 text-gray-800";
-      sentimentText = "Neutral";
-      sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>`;
+        sentimentClass = "bg-gray-100 border-gray-200 text-gray-800";
+        sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>`;
     }
 
-    // Create a visual gauge for the sentiment score
-    const scorePercentage = ((score + 1) / 2) * 100; // Convert from -1...1 to 0...100
-    const gaugeColor =
-      score > 0.25
-        ? "bg-green-500"
-        : score < -0.25
-        ? "bg-red-500"
-        : "bg-gray-500";
-
-    // Format the sentiment display
+    // Handle the key phrases if available
+    const keyPhrases = data.key_phrases || [];
+    const keyPhrasesHtml = keyPhrases.length > 0 
+        ? `<div class="mt-4">
+            <h4 class="font-medium text-purple-900 mb-2">Key Phrases:</h4>
+            <div class="flex flex-wrap gap-2">
+              ${keyPhrases.map(phrase => 
+                `<span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">${phrase}</span>`
+              ).join('')}
+            </div>
+          </div>`
+        : '';
+        
+    // Extract the various meeting analysis sections if available
+    const summary = data.summary || '';
+    const actionItems = data.action_items || [];
+    const speakerDynamics = data.speaker_dynamics || '';
+    const clarityIssues = data.clarity_issues || '';
+    const peopleSignals = data.people_signals || '';
+    
     sentimentBox.innerHTML = `
         <div class="p-5">
-          <div class="flex items-center mb-4">
-            <div class="bg-purple-100 p-2 rounded-full mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <div class="text-lg font-medium text-purple-900">Sentiment Analysis</div>
-          </div>
-          
-          <div class="p-5 rounded-xl ${sentimentClass} border mb-4">
-            <div class="flex items-center mb-3">
-              ${sentimentIcon}
-              <div class="font-semibold text-lg">${sentimentText}</div>
-              <div class="ml-auto text-sm font-medium">${(score * 100).toFixed(
-                1
-              )}%</div>
+            <div class="flex items-center mb-4">
+                <div class="bg-purple-100 p-2 rounded-full mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <div class="text-lg font-medium text-purple-900">Meeting Analysis</div>
             </div>
             
-            <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
-              <div class="${gaugeColor} h-full" style="width: ${scorePercentage}%"></div>
+            <!-- Sentiment Section -->
+            <div class="p-5 rounded-xl ${sentimentClass} border mb-4">
+                <div class="flex items-center mb-3">
+                    ${sentimentIcon}
+                    <div class="font-semibold text-lg">${label}</div>
+                    <div class="ml-auto text-sm font-medium">${(score * 100).toFixed(1)}%</div>
+                </div>
+                
+                <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
+                    <div class="${label === 'POSITIVE' ? 'bg-green-500' : label === 'NEGATIVE' ? 'bg-red-500' : 'bg-gray-500'} h-full" style="width: ${((score + 1) / 2) * 100}%"></div>
+                </div>
+                
+                ${data.analysis ? `<p class="text-sm mt-1">${data.analysis}</p>` : ""}
+                ${keyPhrasesHtml}
             </div>
             
-            ${
-              data.analysis
-                ? `<p class="text-sm mt-1">${data.analysis}</p>`
-                : ""
-            }
-          </div>
-          
-          <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl">
-            <h4 class="font-medium text-purple-900 mb-2">What this means:</h4>
-            <ul class="space-y-2 text-sm text-gray-700">
-              ${
-                score > 0.25
-                  ? `<li class="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  The content has a positive tone and conveys optimism or satisfaction
-                </li>`
-                  : score < -0.25
-                  ? `<li class="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  The content expresses negative sentiments, concerns or dissatisfaction
-                </li>`
-                  : `<li class="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  The content is factual or balanced without strong emotional tone
-                </li>`
-              }
-            </ul>
-          </div>
+            <!-- Meeting Summary Section -->
+            ${summary ? `
+            <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl mb-4">
+                <h4 class="font-medium text-purple-900 mb-2">📋 Meeting Summary:</h4>
+                <div class="text-sm text-gray-700">${summary}</div>
+            </div>
+            ` : ''}
+            
+            <!-- Action Items Section -->
+            ${actionItems.length > 0 ? `
+            <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl mb-4">
+                <h4 class="font-medium text-purple-900 mb-2">🎯 Action Items:</h4>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    ${actionItems.map(item => `
+                    <li class="flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        ${item}
+                    </li>
+                    `).join('')}
+                </ul>
+            </div>
+            ` : ''}
+            
+            <!-- Speaker Dynamics Section -->
+            ${speakerDynamics ? `
+            <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl mb-4">
+                <h4 class="font-medium text-purple-900 mb-2">👥 Speaker Dynamics:</h4>
+                <div class="text-sm text-gray-700">${speakerDynamics}</div>
+            </div>
+            ` : ''}
+            
+            <!-- Clarity Issues Section -->
+            ${clarityIssues ? `
+            <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl mb-4">
+                <h4 class="font-medium text-purple-900 mb-2">🔍 Clarity & Confusion:</h4>
+                <div class="text-sm text-gray-700">${clarityIssues}</div>
+            </div>
+            ` : ''}
+            
+            <!-- People & Culture Signals Section -->
+            ${peopleSignals ? `
+            <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl mb-4">
+                <h4 class="font-medium text-purple-900 mb-2">🚨 People & Culture Signals:</h4>
+                <div class="text-sm text-gray-700">${peopleSignals}</div>
+            </div>
+            ` : ''}
         </div>
-      `;
+    `;
 
     sentimentBox.classList.remove("hidden");
-  }
+    
+    // Also show the Meeting Summary card
+    document.getElementById("meetingSummary").classList.remove("hidden");
+    
+    // Update the meeting summary card with information if available
+    if (data.meeting_duration) {
+        document.getElementById("meetingDuration").innerText = data.meeting_duration;
+    }
+    
+    if (data.topics) {
+        document.getElementById("meetingTopics").innerText = data.topics.join(", ");
+    }
+    
+    if (sentiment.label) {
+        document.getElementById("meetingSentiment").innerText = sentiment.label;
+    }
+}
 </script>
 {% endblock scripts %}

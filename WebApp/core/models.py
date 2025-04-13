@@ -7,6 +7,10 @@ class TranscriptionRecord(models.Model):
     sentiment_score = models.FloatField(null=True, blank=True)
     sentiment_label = models.CharField(max_length=20, null=True, blank=True)
     sentiment_analysis = models.TextField(null=True, blank=True)
+    key_phrases = models.JSONField(null=True, blank=True)  # New field
+    meeting_summary = models.TextField(null=True, blank=True)  # New field
+    action_items = models.JSONField(null=True, blank=True)  # New field
+    speaker_dynamics = models.TextField(null=True, blank=True)  # New field
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

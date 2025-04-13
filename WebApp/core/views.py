@@ -124,117 +124,27 @@ def analyze_sentiment(request):
             # Get sentiment analysis from OpenAI
             response = client.chat.completions.create(
                 model="gpt-4o",
-                # messages=[
-                #     {"role": "system", "content": """
-                #      Analyze the sentiment of the following text.
-                #      Return a JSON object with these fields:
-                #      - sentiment.score: a number between -1 (very negative) and 1 (very positive)
-                #      - sentiment.label: "POSITIVE", "NEGATIVE", or "NEUTRAL"
-                #      - analysis: a brief 1-2 sentence summary of the sentiment
-                #      - key_phrases: an array of important phrases from the text
-                #      """},
-                #     {"role": "user", "content": text}
-                # ],
-                      messages=[
-                          {"role": "system", "content": """
-                     You are a highly intelligent post-meeting analysis assistant, built for fast-moving startups and modern organizations. Your job is to analyze the transcript (and optional metadata) of a recorded team meeting and generate a world-class executive dashboard review. This review should feel like it was written by a senior consultant who deeply understands leadership, HR dynamics, and organizational psychology.
-
-Generate a polished, presentation-ready report with clear structure, professional tone, and visually segmentable insights. Format the output as follows:"
-
-📋 [EngageSync Meeting Review Report]
-🧠 1. High-Level Summary (For Founders & Execs)
-Summarize the *core purpose, **key decisions, and *meeting impact in 3–5 bullet points.
-
-Focus on what actually moved the company forward (or didn’t).
-
-Use bold headers to segment each bullet for clarity (e.g., Decision Made, Team Alignment, Follow-Up Required).
-
-🎯 2. Action Items & Ownership
-List all actionable tasks mentioned in the meeting.
-
-Use this format:
-🔹 [Owner Name] – [Action Item] → 🗓 Due: [Date or "Next Meeting"]
-
-Include a final note: “All action items will be auto-sent to assigned individuals via email/Slack integration (future feature).”
-
-👥 3. Speaker Dynamics & Participation Map
-Provide a pie chart-style breakdown (or text if needed):
-
-% Speaking Time per person
-
-Notes on over/under participation
-
-Sample insights:
-
-"Jake led 52% of the meeting. Emily spoke only 4%—consider checking in for alignment."
-
-"Balance was healthy; all members contributed within a 15% range."
-
-😐 4. Sentiment & Communication Analysis
-Analyze tone, stress patterns, sentiment shifts throughout the meeting.
-
-Use natural language plus a simple color-coded scale:
-
-🟢 Positive
-
-🟡 Neutral/Mixed
-
-🔴 Tense/Negative
-
-Flag emotionally loaded segments like:
-
-“Tension rose during budget discussion—recommend a focused follow-up.”
-
-“Team showed excitement around product feature rollout.”
-
-🔍 5. Clarity & Confusion Hotspots
-Highlight moments that may have caused confusion, based on:
-
-Filler words
-
-Repetition
-
-Interruptions
-
-Complex jargon
-
-Sample output:
-
-“Section on KPIs lacked clarity—3 interruptions, unclear terminology noted.”
-
-🚨 6. People & Culture Signals
-Offer subtle, behavior-driven insights for HR and leadership:
-
-“Sarah has been silent in the last 3 meetings—might need a morale check-in.”
-
-“Team energy dipped toward the end—consider reducing meeting time.”
-
-“High engagement and laughter during product discussion—signal of team buy-in.”
-
-📁 7. Downloadable Snapshot (PDF-ready Summary)
-One-paragraph version of everything above
-
-Designed to be stored in company records, used in retros, or shared in team channels.
-
-🎯 Output Notes:
-Always use professional, supportive language.
-
-Never shame or judge—focus on constructive improvement.
-
-Format everything clearly using headers, icons, and spacing for visual ease.
-
-The tone should reflect the intelligence of an elite communication coach + business consultant.
+                messages=[
+                    {"role": "system", "content": """
+                     You are a highly intelligent post-meeting analysis assistant, built for fast-moving startups and modern organizations. Your job is to analyze the transcript of a recorded team meeting and generate a world-class executive dashboard review.
+                     
                      Return a JSON object with these fields:
-                     - sentiment.score: a number between -1 (very negative) and 1 (very positive)
-                     - sentiment.label: "POSITIVE", "NEGATIVE", or "NEUTRAL"
-                     - analysis: a brief 1-2 sentence summary of the sentiment
-                     - key_phrases: an array of important phrases from the text
+                     - sentiment: an object with 'score' (number between -1 and 1) and 'label' ("POSITIVE", "NEGATIVE", or "NEUTRAL")
+                     - analysis: a brief 1-2 sentence summary of the overall sentiment
+                     - key_phrases: an array of important phrases from the text (limit to 5)
+                     - summary: a high-level summary with 3-5 bullet points about core purpose and key decisions
+                     - action_items: array of action items mentioned in the meeting
+                     - speaker_dynamics: text analysis of speaker participation patterns
+                     - clarity_issues: text highlighting any confusion points in the meeting
+                     - people_signals: insights about team dynamics and engagement
+                     - meeting_duration: estimated meeting length (if detectable from transcript)
+                     - topics: array of main topics discussed (limit to 3-5)
                      """},
-                          {"role": "user", "content": text}
-                      ],
+                    {"role": "user", "content": text}
+                ],
                 response_format={"type": "json_object"}
             )
-            print(response)
+            
             result = json.loads(response.choices[0].message.content)
 
             # Update the database record with sentiment information if record_id is provided
@@ -242,10 +152,8 @@ The tone should reflect the intelligence of an elite communication coach + busin
                 try:
                     record = TranscriptionRecord.objects.get(
                         id=record_id, user=request.user)
-                    record.sentiment_score = result.get(
-                        'sentiment', {}).get('score', 0)
-                    record.sentiment_label = result.get(
-                        'sentiment', {}).get('label', 'NEUTRAL')
+                    record.sentiment_score = result.get('sentiment', {}).get('score', 0)
+                    record.sentiment_label = result.get('sentiment', {}).get('label', 'NEUTRAL')
                     record.sentiment_analysis = result.get('analysis', '')
                     record.save()
                 except TranscriptionRecord.DoesNotExist:
@@ -258,7 +166,6 @@ The tone should reflect the intelligence of an elite communication coach + busin
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
 
 @login_required
 def transcription_history(request):
