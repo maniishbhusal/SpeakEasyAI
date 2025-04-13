@@ -147,14 +147,22 @@ def analyze_sentiment(request):
             
             result = json.loads(response.choices[0].message.content)
 
-            # Update the database record with sentiment information if record_id is provided
+            # Update the database record with all information if record_id is provided
             if record_id:
                 try:
                     record = TranscriptionRecord.objects.get(
                         id=record_id, user=request.user)
+                    # Save sentiment data
                     record.sentiment_score = result.get('sentiment', {}).get('score', 0)
                     record.sentiment_label = result.get('sentiment', {}).get('label', 'NEUTRAL')
                     record.sentiment_analysis = result.get('analysis', '')
+                    
+                    # Save additional AI analysis data
+                    record.key_phrases = result.get('key_phrases', [])
+                    record.meeting_summary = result.get('summary', '')
+                    record.action_items = result.get('action_items', [])
+                    record.speaker_dynamics = result.get('speaker_dynamics', '')
+                    
                     record.save()
                 except TranscriptionRecord.DoesNotExist:
                     pass
