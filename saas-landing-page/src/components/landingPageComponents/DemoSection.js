@@ -13,6 +13,8 @@ import MaxWidthWrapper from "../MaxWidthWrapper";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+import Iframe from "react-iframe";
+
 export default function InstallExtensionCTA() {
   const [isVideoHovered, setIsVideoHovered] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
