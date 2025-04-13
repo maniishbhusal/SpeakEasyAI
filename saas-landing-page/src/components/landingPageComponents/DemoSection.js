@@ -212,7 +212,7 @@ export default function InstallExtensionCTA() {
               onMouseLeave={() => setIsVideoHovered(false)}
             >
               <Iframe
-                url="https://www.youtube.com/embed/faBbwMK6XuI?si=4AhnQIRRDmdCqOU9"
+                url="https://www.youtube.com/embed/ubC6ekYCSFE?si=aXWnXHl59vhUi4J-"
                 width="100%"
                 height="400"
                 id="videoIframe"

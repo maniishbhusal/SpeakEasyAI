@@ -4,7 +4,7 @@
 **SpeakEasyAI** is an AI-powered emotional intelligence dashboard that transcribes spoken conversations and analyzes their sentiment. Built during a hackathon, the tool is designed to help teams, managers, and HR departments gain valuable post-meeting insights into communication tone, emotional dynamics, and speaker feedback.
 
 > 🔗 [Live Demo]  
-> 📁 [YouTube Video](https://github.com/maniishbhusal/SpeakEasyAI_hackathon)
+> 📁 [YouTube Video](https://www.youtube.com/watch?v=ubC6ekYCSFE)
 
 ---
 
