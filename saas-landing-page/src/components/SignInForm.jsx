@@ -22,7 +22,7 @@ export default function SignInForm() {
       await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Simulated login logic (dummy credentials)
-      if (email === "test@example.com" && password === "password") {
+      if (email === "manish@gmail.com" && password === "manishtesting") {
         localStorage.setItem("loggedIn", "true");
         router.push("http://127.0.0.1:8000");
       } else {
